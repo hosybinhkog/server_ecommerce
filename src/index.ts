@@ -8,6 +8,7 @@ import expressFileUpload from "express-fileupload";
 
 import connectMongo from "./services/connectMongo";
 import router from "./routes";
+import errorMiddleware from "./middleware/error";
 
 const PORT = process.env.PORT;
 
@@ -28,6 +29,7 @@ const main = async () => {
   app.use(expressFileUpload());
 
   app.use("/api/v1/", router);
+  app.use(errorMiddleware);
   await connectMongo();
 
   app.listen(PORT, () => {
