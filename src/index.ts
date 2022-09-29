@@ -5,6 +5,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import expressFileUpload from "express-fileupload";
+import cloundinary from "cloudinary";
 
 import connectMongo from "./services/connectMongo";
 import router from "./routes";
@@ -16,6 +17,12 @@ console.log(PORT);
 
 const main = async () => {
   const app = express();
+  cloundinary.v2.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+
   app.use(
     cors({
       origin: "http://localhost:6969",
