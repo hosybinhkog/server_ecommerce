@@ -2,7 +2,7 @@ import { Response } from "express";
 
 const sendToken = async (user: any, statusCode: number, res: Response) => {
   const token = user?.getJWTToken();
-
+  user.password = undefined;
   const options = {
     expires: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
     httpOnly: true,
