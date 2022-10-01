@@ -7,7 +7,7 @@ import ErrorHandler from "../utils/errorHandle";
 import sendToken from "../utils/jwtToken";
 import { sendEmail } from "../utils/sendEmailChangeOrForgotPassword";
 
-export const register = catchAsyncError(async (req, res, next) => {
+export const register = catchAsyncError(async (req, res, _next) => {
   const myCloud = await cloundinary.v2.uploader.upload(req.body.avatar, {
     folder: "avatars",
     width: 150,
@@ -51,7 +51,7 @@ export const login = catchAsyncError(async (req, res, next) => {
   sendToken(user, 200, res);
 });
 
-export const logout = catchAsyncError(async (req, res, next) => {
+export const logout = catchAsyncError(async (_req, res, _next) => {
   res.cookie("token", null, {
     expires: new Date(Date.now()),
     httpOnly: true,
@@ -63,7 +63,7 @@ export const logout = catchAsyncError(async (req, res, next) => {
   });
 });
 
-export const forgotPassword = catchAsyncError(async (req, res, next) => {
+export const forgotPassword = catchAsyncError(async (req, _res, next) => {
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) {
@@ -123,17 +123,153 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
   sendToken(user, 200, res);
 });
 
-export const updateProfile = catchAsyncError(async (req, res, next) => {
+export const updateProfile = catchAsyncError(async (req, res, _next) => {
   const newUserData = {
     username: req.body.username,
     email: req.body.email,
   };
 
-  if (req.body.avatar !== "" || !req.body.avatar) {
+  if (req.body.avatar !== "") {
     // @ts-ignore
     const user = await User.findById(req.user.id);
     const imageId = user?.avatar?.public_id;
 
     await cloundinary.v2.uploader.destroy(imageId as string);
+    const myCloud = await cloundinary.v2.uploader.upload(req.body.avatar, {
+      folder: "avatars",
+      width: 150,
+      crop: "scale",
+    });
+
+    // @ts-ignore
+    newUserData.avatar = {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    };
   }
+  // @ts-ignore
+  const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+export const getUserDetails = catchAsyncError(async (req, res, next) => {
+  // @ts-ignore
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return next(new ErrorHandler("User not found or not logged in", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    user,
+    message: "get user details successfully completed",
+  });
+});
+
+export const getAllUser = catchAsyncError(async (_req, res, _next) => {
+  const users = await User.find({});
+
+  res.status(200).json({
+    users,
+    success: true,
+    message: "get all users successfully",
+  });
+});
+
+export const getSingleUser = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new ErrorHandler("User not found", 404));
+  }
+
+  res.status(200).json({
+    user,
+    message: "get user successfully",
+    success: true,
+  });
+});
+
+export const updateUserRole = catchAsyncError(async (req, res, _next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+    role: req.body.role,
+  };
+
+  if (!req.body.idUserUpdateRole) {
+    // @ts-ignore
+    const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+      runValidators: true,
+      new: true,
+    });
+
+    return res.status(200).json({
+      success: true,
+      user,
+      message: "update role successfully",
+    });
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.body.idUserUpdateRole,
+    newUserData,
+    {
+      runValidators: true,
+      new: true,
+    }
+  );
+
+  return res.status(200).json({
+    success: true,
+    user,
+    message: "update role successfully",
+  });
+});
+
+export const deleteUser = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new ErrorHandler("user not found", 404));
+  }
+
+  const imageId = user?.avatar?.public_id;
+
+  await cloundinary.v2.uploader.destroy(imageId as string);
+
+  await user.remove();
+
+  res.status(200).json({
+    success: true,
+    message: "User deleted successfully",
+  });
+});
+
+export const updatePassword = catchAsyncError(async (req, res, next) => {
+  // @ts-ignore
+  const user = await User.findById(req.user.id).select("+password");
+  // @ts-ignore
+  const isPasswordMatched = await user?.comparePassword(req.body.oldPassword);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Old password is incorrect", 400));
+  }
+
+  if (req.body.newPassword !== req.body.confirmPassword) {
+    return next(new ErrorHandler("Password not match", 400));
+  }
+
+  if (user) {
+    user.password = req.body.newPassword;
+
+    await user.save();
+  }
+
+  sendToken(user, 200, res);
 });
