@@ -35,7 +35,7 @@ const main = async () => {
   app.use(cookieParser());
   app.use(expressFileUpload());
 
-  app.use("/api/v1/", router);
+  app.use(router);
   app.use(errorMiddleware);
   await connectMongo();
 

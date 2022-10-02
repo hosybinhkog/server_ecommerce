@@ -23,6 +23,14 @@ const Product = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "category",
     },
+    category: {
+      type: String,
+    },
+    Stock: {
+      type: Number,
+      default: 1,
+      maxLength: 5,
+    },
     rating: {
       type: Number,
       default: 0,
@@ -39,17 +47,26 @@ const Product = new Schema(
         },
       },
     ],
+    numOfReviews: {
+      type: Number,
+      default: 0,
+    },
     reviews: [
       {
         username: {
           type: String,
           required: true,
+          default: "No name",
         },
         rating: {
           type: Number,
           required: true,
         },
         comment: {
+          type: String,
+          required: true,
+        },
+        user: {
           type: String,
           required: true,
         },
