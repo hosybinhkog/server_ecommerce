@@ -1,6 +1,6 @@
 import express from "express";
-import { userController } from "src/controllers";
-import { isAuthenticated, authorizeRoles } from "src/middleware/auth";
+import { userController } from "../controllers";
+import { isAuthenticated, authorizeRoles } from "../middleware/auth";
 
 const userRouter = express.Router();
 
@@ -21,18 +21,18 @@ userRouter.get(
   "/admin/users",
   isAuthenticated,
   authorizeRoles("admin"),
+  userController.getAllUser
+);
+
+userRouter.get(
+  "/admin/user/:id",
+  isAuthenticated,
+  authorizeRoles("admin"),
   userController.getSingleUser
 );
 
-userRouter.put(
-  "admin/user:id",
-  isAuthenticated,
-  authorizeRoles("admin"),
-  userController.updateUserRole
-);
-
 userRouter.delete(
-  "admin/user/:id",
+  "/admin/user/:id",
   isAuthenticated,
   authorizeRoles("admin"),
   userController.deleteUser

@@ -1,6 +1,6 @@
 require("dotenv").config();
 import catchAsyncError from "./catchAsyncError";
-import ErrorHandler from "src/utils/errorHandle";
+import ErrorHandler from "../utils/errorHandle";
 import jwt from "jsonwebtoken";
 import { User } from "../models";
 import { NextFunction, Request, Response } from "express";

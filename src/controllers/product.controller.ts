@@ -1,7 +1,7 @@
 import ErrorHandler from "../utils/errorHandle";
 import cloundinary from "cloudinary";
-import catchAsyncError from "src/middleware/catchAsyncError";
-import ApiFutures from "src/utils/apiFeatures";
+import catchAsyncError from "../middleware/catchAsyncError";
+import ApiFutures from "../utils/apiFeatures";
 import { Product } from "../models";
 
 export const getAllProducNonSort = catchAsyncError(async (_req, res, _next) => {

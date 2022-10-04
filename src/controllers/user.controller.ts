@@ -8,13 +8,28 @@ import sendToken from "../utils/jwtToken";
 import { sendEmail } from "../utils/sendEmailChangeOrForgotPassword";
 
 export const register = catchAsyncError(async (req, res, _next) => {
+  const { username, email, password } = req.body;
+
+  if (!req.body.avatar) {
+    // @ts-ginore
+    const user = await User.create({
+      username,
+      email,
+      password,
+      avatar: {
+        public_id: Math.random().toString(),
+        url: "https://res.cloudinary.com/hosybinh/image/upload/v1664697559/avatars/avatar_r6qdac.png",
+      },
+    });
+
+    return sendToken(user, 200, res);
+  }
+  // @ts-ginore
   const myCloud = await cloundinary.v2.uploader.upload(req.body.avatar, {
     folder: "avatars",
     width: 150,
     crop: "scale",
   });
-
-  const { username, email, password } = req.body;
   const user = await User.create({
     username,
     email,
@@ -25,7 +40,7 @@ export const register = catchAsyncError(async (req, res, _next) => {
     },
   });
 
-  sendToken(user, 200, res);
+  return sendToken(user, 200, res);
 });
 
 export const login = catchAsyncError(async (req, res, next) => {
@@ -63,8 +78,8 @@ export const logout = catchAsyncError(async (_req, res, _next) => {
   });
 });
 
-export const forgotPassword = catchAsyncError(async (req, _res, next) => {
-  const user = await User.findOne({ email: req.body.email });
+export const forgotPassword = catchAsyncError(async (req, res, next) => {
+  const user: any = await User.findOne({ email: req.body.email });
 
   if (!user) {
     return next(new ErrorHandler("User not found", 404));
@@ -76,7 +91,7 @@ export const forgotPassword = catchAsyncError(async (req, _res, next) => {
 
   const resetPasswordUrl = `${req.protocol}://${req.get(
     "host"
-  )}:/api/v1/user/password/reset/${tokenReset}`;
+  )}/api/v1/user/password/reset/${tokenReset}`;
 
   const message = `Your password reset token is ${resetPasswordUrl} you have a link`;
 
@@ -85,6 +100,14 @@ export const forgotPassword = catchAsyncError(async (req, _res, next) => {
       email: user.email,
       suject: "Ecommerce",
       message,
+      html: `<b>Changepassword Link: </b>${message}`,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "change-password",
+      email: user.email,
+      suject: "Ecommerce",
       html: `<b>Changepassword Link: </b>${message}`,
     });
   } catch (error) {
@@ -129,7 +152,7 @@ export const updateProfile = catchAsyncError(async (req, res, _next) => {
     email: req.body.email,
   };
 
-  if (req.body.avatar !== "") {
+  if (req.body.avatar !== undefined) {
     // @ts-ignore
     const user = await User.findById(req.user.id);
     const imageId = user?.avatar?.public_id;

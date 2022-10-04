@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import ErrorHandler from "src/utils/errorHandle";
+import ErrorHandler from "../utils/errorHandle";
 
 const errorMiddleware = (
   err: any,
@@ -16,7 +16,7 @@ const errorMiddleware = (
   }
 
   if (err.code === 11000) {
-    const message = "Đã tồn tại email";
+    const message = "email is doulecap";
     err = new ErrorHandler(message, 400);
   }
 

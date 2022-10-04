@@ -17,13 +17,13 @@ const User = new Schema(
     },
     email: {
       type: String,
-      required: [true, "Vui lòng nhập email"],
+      required: [true, "email is required"],
       unique: true,
-      validate: [validator.isEmail, "Vui lòng nhập email"],
+      validate: [validator.isEmail, "email is required"],
     },
     password: {
       type: String,
-      required: [true, "Vui lòng nhập password"],
+      required: [true, "password is required"],
       minLength: [8, "Mật khẩu phải lớn hơn 8 chữ"],
       select: false,
     },
