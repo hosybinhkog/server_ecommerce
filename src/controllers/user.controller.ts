@@ -45,7 +45,6 @@ export const register = catchAsyncError(async (req, res, _next) => {
 
 export const login = catchAsyncError(async (req, res, next) => {
   const { email, password } = req.body;
-
   if (!email || !password) {
     return next(new ErrorHandler("Please enter email/password...", 400));
   }
@@ -57,7 +56,7 @@ export const login = catchAsyncError(async (req, res, next) => {
   }
 
   //@ts-ignore
-  const isPasswordMatched = user.comparePassword(password);
+  const isPasswordMatched = await user.comparePassword(password);
 
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Wrong email or password", 401));
@@ -85,27 +84,31 @@ export const forgotPassword = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("User not found", 404));
   }
 
+  console.log(user);
+
   // @ts-ignore
   const tokenReset = await user.getResetPasswordToken();
   await user.save({ validateBeforeSave: false });
 
-  const resetPasswordUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/api/v1/user/password/reset/${tokenReset}`;
+  // const resetPasswordUrl: string = `${req.protocol}://${req.get(
+  //   "host"
+  // )}/reset-password/${tokenReset}`;
 
-  const message = `Your password reset token is ${resetPasswordUrl} you have a link`;
+  const resetPasswordUrl: string = `http://localhost:6969/reset-password/${tokenReset}`;
+
+  const message: string = `Your password reset token is <a href="${resetPasswordUrl}">Click</a> you have a link`;
 
   try {
     await sendEmail({
       email: user.email,
       suject: "Ecommerce",
-      message,
-      html: `<b>Changepassword Link: </b>${message}`,
+      message: `<b>Changepassword Link:${message} </b>`,
+      html: `<b>Changepassword Link: ${message}</b>`,
     });
 
     return res.status(200).json({
       success: true,
-      message: "change-password",
+      message,
       email: user.email,
       suject: "Ecommerce",
       html: `<b>Changepassword Link: </b>${message}`,
@@ -134,6 +137,8 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
   if (!user) {
     return next(new ErrorHandler("User not found or not logged in", 404));
   }
+
+  console.log(req.body);
 
   if (req.body.newPasssword !== req.body.confirmPassword) {
     return next(new ErrorHandler("Comfirm password not matched", 400));

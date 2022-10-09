@@ -23,6 +23,7 @@ export const sendEmail = async (options: any) => {
     to: options.email,
     subject: options.subject,
     text: options.message,
+    html: options.message,
   };
 
   const info = await transporter.sendMail(mailOptions);

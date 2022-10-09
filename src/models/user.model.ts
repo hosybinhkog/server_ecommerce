@@ -12,19 +12,19 @@ const User = new Schema(
     username: {
       type: String,
       required: [true, "username is required"],
-      minLength: [4, "Tên phải nhiều hơn 4 chữ"],
-      maxLength: [30, "Tối ta 30 chữ"],
+      minLength: [4, "username > 4"],
+      maxLength: [30, "username < 30"],
     },
     email: {
       type: String,
       required: [true, "email is required"],
       unique: true,
-      validate: [validator.isEmail, "email is required"],
+      validate: [validator.isEmail, "email invalid format"],
     },
     password: {
       type: String,
       required: [true, "password is required"],
-      minLength: [8, "Mật khẩu phải lớn hơn 8 chữ"],
+      minLength: [8, "password >= 8"],
       select: false,
     },
     avatar: {

@@ -13,8 +13,6 @@ import errorMiddleware from "./middleware/error";
 
 const PORT = process.env.PORT;
 
-console.log(PORT);
-
 const main = async () => {
   const app = express();
   cloundinary.v2.config({
@@ -29,6 +27,7 @@ const main = async () => {
       credentials: true,
     })
   );
+  app.use(express.json());
   app.use(morgan("tiny"));
   app.use(helmet());
   app.use(express.urlencoded({ extended: true }));
