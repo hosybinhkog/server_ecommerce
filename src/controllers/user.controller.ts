@@ -17,7 +17,7 @@ export const register = catchAsyncError(async (req, res, _next) => {
       email,
       password,
       avatar: {
-        public_id: Math.random().toString(),
+        public_id: "",
         url: "https://res.cloudinary.com/hosybinh/image/upload/v1664697559/avatars/avatar_r6qdac.png",
       },
     });
@@ -156,13 +156,12 @@ export const updateProfile = catchAsyncError(async (req, res, _next) => {
     username: req.body.username,
     email: req.body.email,
   };
+  // @ts-ignore
+  const userExist = await User.findById(req.user.id);
 
   if (req.body.avatar !== undefined) {
-    // @ts-ignore
-    const user = await User.findById(req.user.id);
-    const imageId = user?.avatar?.public_id;
-
-    await cloundinary.v2.uploader.destroy(imageId as string);
+    const imageId = userExist?.avatar?.public_id;
+    if (imageId) await cloundinary.v2.uploader.destroy(imageId as string, {});
     const myCloud = await cloundinary.v2.uploader.upload(req.body.avatar, {
       folder: "avatars",
       width: 150,
