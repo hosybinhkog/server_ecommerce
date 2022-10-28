@@ -6,6 +6,7 @@ import {
 } from "../middleware/auth";
 
 const productRoute = express.Router();
+productRoute.get("/None", productController.getAllProducNonSort);
 
 productRoute.get("/", productController.getAllProducts);
 

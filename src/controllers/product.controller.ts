@@ -16,13 +16,15 @@ export const getAllProducNonSort = catchAsyncError(async (_req, res, _next) => {
 export const getAllProducts = catchAsyncError(async (req, res, _next) => {
   const resultPerPage = req.body.resultPerPage || 20;
   const productsCount = await Product.countDocuments();
-
+  console.log(req.query);
   const apiFeatures = await new ApiFutures(Product.find({}), req.query)
     .search()
     .filter()
     .pagination(resultPerPage);
 
-  const products = apiFeatures.query;
+  console.log(apiFeatures);
+
+  const products = await apiFeatures.query;
   const filteredProductsCount = products.length;
 
   res.status(200).json({
@@ -159,11 +161,15 @@ export const createProductReview = catchAsyncError(async (req, res, next) => {
 
   const review = {
     // @ts-ignore
-    user: req.user._id as string,
+    userId: req.user._id as string,
     // @ts-ignore
     username: req.user.name as string,
     rating: Number(rating),
     comment: comment as string,
+    // @ts-ignore
+    url: req?.user?.avatar?.url as string,
+    // @ts-ignore
+    user: req.user.name as string,
   };
 
   const product = await Product.findById(producId);

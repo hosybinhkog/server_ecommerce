@@ -19,6 +19,7 @@ export default class ApiFutures {
 
     return this;
   }
+
   filter() {
     const queryCopy = { ...this.queryString };
 
@@ -32,9 +33,11 @@ export default class ApiFutures {
       /\b(t|gte|lt|lte)\b/g,
       (key) => `$${key}`
     );
+
     this.query = this.query.find(JSON.parse(queryString));
     return this;
   }
+
   pagination(resultPerPage: number) {
     const currentPage = Number(this.queryString.page) || 1;
     const skip = resultPerPage * (currentPage - 1);

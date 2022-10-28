@@ -68,7 +68,12 @@ const Product = new Schema(
         },
         user: {
           type: String,
-          required: true,
+        },
+        url: {
+          type: String,
+        },
+        userId: {
+          type: String,
         },
       },
     ],
