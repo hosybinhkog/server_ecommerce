@@ -16,13 +16,19 @@ export const getAllProducNonSort = catchAsyncError(async (_req, res, _next) => {
 export const getAllProducts = catchAsyncError(async (req, res, _next) => {
   const resultPerPage = req.body.resultPerPage || 20;
   const productsCount = await Product.countDocuments();
-  console.log(req.query);
-  const apiFeatures = await new ApiFutures(Product.find({}), req.query)
+
+  let apiFeatures;
+  if (req.query.category) {
+    apiFeatures = await new ApiFutures(Product.find({}), req.query)
+      .search()
+      .categories()
+      .filter()
+      .pagination(resultPerPage);
+  }
+  apiFeatures = await new ApiFutures(Product.find({}), req.query)
     .search()
     .filter()
     .pagination(resultPerPage);
-
-  console.log(apiFeatures);
 
   const products = await apiFeatures.query;
   const filteredProductsCount = products.length;
@@ -157,22 +163,24 @@ export const getProductsAdmin = catchAsyncError(async (_req, res, _next) => {
 });
 
 export const createProductReview = catchAsyncError(async (req, res, next) => {
-  const { rating, comment, producId } = req.body;
+  const { rating, comment, productId } = req.body;
 
   const review = {
     // @ts-ignore
     userId: req.user._id as string,
     // @ts-ignore
-    username: req.user.name as string,
+    username: req.user.username as string,
     rating: Number(rating),
     comment: comment as string,
     // @ts-ignore
     url: req?.user?.avatar?.url as string,
     // @ts-ignore
-    user: req.user.name as string,
+    user: req.user.username as string,
   };
 
-  const product = await Product.findById(producId);
+  console.log("Product íd", productId);
+
+  const product = await Product.findById(productId);
 
   if (!product) return next(new ErrorHandler("Product is not found", 404));
 

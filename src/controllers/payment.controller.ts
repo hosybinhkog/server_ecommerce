@@ -2,7 +2,7 @@ require("dotenv").config();
 import catchAsyncError from "../middleware/catchAsyncError";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.API_KEY_STRIPE as string, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   typescript: true,
   apiVersion: "2022-08-01",
 });

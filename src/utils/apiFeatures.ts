@@ -23,7 +23,7 @@ export default class ApiFutures {
   filter() {
     const queryCopy = { ...this.queryString };
 
-    const removeFields = ["keywords", "page", "limit"];
+    const removeFields = ["keywords", "page", "limit", "category"];
 
     removeFields.forEach((key) => delete queryCopy[key]);
 
@@ -35,6 +35,14 @@ export default class ApiFutures {
     );
 
     this.query = this.query.find(JSON.parse(queryString));
+    return this;
+  }
+
+  categories() {
+    const categoryId = this.queryString.category;
+
+    this.query = this.query.find({ categoryId });
+
     return this;
   }
 
