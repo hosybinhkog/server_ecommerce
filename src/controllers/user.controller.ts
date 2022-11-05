@@ -138,8 +138,6 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("User not found or not logged in", 404));
   }
 
-  console.log(req.body);
-
   if (req.body.newPasssword !== req.body.confirmPassword) {
     return next(new ErrorHandler("Comfirm password not matched", 400));
   }
