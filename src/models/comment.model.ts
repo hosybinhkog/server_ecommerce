@@ -15,6 +15,18 @@ const CommentPost = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "post",
     },
+    imgs: [
+      {
+        public_id: {
+          type: String,
+          required: true,
+        },
+        url: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

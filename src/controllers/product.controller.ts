@@ -94,7 +94,8 @@ export const updateProduct = catchAsyncError(async (req, res, next) => {
 
   if (images !== undefined) {
     for (let i = 0; i < images.length; i++) {
-      await cloundinary.v2.uploader.destroy(updateProduct.imgs[i].public_id);
+      if (updateProduct?.imgs[i]?.public_id)
+        await cloundinary.v2.uploader.destroy(updateProduct.imgs[i].public_id);
     }
 
     const imagesLinks = [];
@@ -113,10 +114,14 @@ export const updateProduct = catchAsyncError(async (req, res, next) => {
     req.body.imgs = imagesLinks;
   }
 
+  req.body.price = parseFloat(req.body.price);
+
   updateProduct = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
+
+  await updateProduct?.save();
 
   res.status(200).json({
     message: "Updated product successfully",
@@ -157,6 +162,7 @@ export const getProductsAdmin = catchAsyncError(async (_req, res, _next) => {
 
   res.status(200).json({
     success: true,
+
     message: "gets product successfully",
     products,
   });
@@ -164,6 +170,31 @@ export const getProductsAdmin = catchAsyncError(async (_req, res, _next) => {
 
 export const createProductReview = catchAsyncError(async (req, res, next) => {
   const { rating, comment, productId } = req.body;
+
+  let images = [];
+
+  if (typeof req.body.imgs === "string") {
+    images.push(req.body.imgs);
+  } else {
+    images = req.body.imgs;
+  }
+
+  if (images !== undefined) {
+    const imagesLinks = [];
+
+    for (let i = 0; i < images.length; i++) {
+      const result = await cloundinary.v2.uploader.upload(images[i], {
+        folder: "comments",
+      });
+
+      imagesLinks.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
+    req.body.imgs = imagesLinks;
+  }
 
   const review = {
     // @ts-ignore
@@ -176,9 +207,8 @@ export const createProductReview = catchAsyncError(async (req, res, next) => {
     url: req?.user?.avatar?.url as string,
     // @ts-ignore
     user: req.user.username as string,
+    imgs: req.body.imgs,
   };
-
-  console.log("Product íd", productId);
 
   const product = await Product.findById(productId);
 

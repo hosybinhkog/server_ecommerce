@@ -75,6 +75,18 @@ const Product = new Schema(
         userId: {
           type: String,
         },
+        imgs: [
+          {
+            public_id: {
+              type: String,
+              required: true,
+            },
+            url: {
+              type: String,
+              required: true,
+            },
+          },
+        ],
       },
     ],
   },
