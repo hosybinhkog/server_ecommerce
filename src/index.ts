@@ -6,12 +6,15 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import expressFileUpload from "express-fileupload";
 import cloundinary from "cloudinary";
+import path from "path";
+import { createStream } from "rotating-file-stream";
 
 import connectMongo from "./services/connectMongo";
 import router from "./routes";
 import errorMiddleware from "./middleware/error";
 
 const PORT = process.env.PORT;
+const isProduction = process.env.PRODUCTION;
 
 const main = async () => {
   const app = express();
@@ -21,15 +24,24 @@ const main = async () => {
     api_secret: process.env.CLOUDINARY_API_SECRET,
   });
 
+  const accessLogStream = createStream("access.log", {
+    interval: "1d",
+    path: path.join(__dirname, "log"),
+  });
+
   app.use(
     cors({
       origin: "http://localhost:6969",
       credentials: true,
     })
   );
-  app.use(express.json());
-  app.use(morgan("tiny"));
   app.use(helmet());
+  app.use(express.json());
+  app.use(
+    isProduction
+      ? morgan("combined", { stream: accessLogStream })
+      : morgan("dev")
+  );
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
   app.use(expressFileUpload());

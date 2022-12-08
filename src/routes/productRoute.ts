@@ -3,6 +3,7 @@ import { productController } from "../controllers";
 import {
   isAuthenticated as isAuthenticatedUser,
   authorizeRoles,
+  checkUser,
 } from "../middleware/auth";
 
 const productRoute = express.Router();
@@ -50,6 +51,6 @@ productRoute.delete(
   authorizeRoles("admin"),
   productController.deleteProduct
 );
-productRoute.get("/:id", productController.getProductDetails);
+productRoute.get("/:id", checkUser, productController.getProductDetails);
 
 export default productRoute;

@@ -1,8 +1,8 @@
-import ErrorHandler from "../utils/errorHandle";
 import cloundinary from "cloudinary";
 import catchAsyncError from "../middleware/catchAsyncError";
+import { loggerUserClick, Product } from "../models";
 import ApiFutures from "../utils/apiFeatures";
-import { Product } from "../models";
+import ErrorHandler from "../utils/errorHandle";
 
 export const getAllProducNonSort = catchAsyncError(async (_req, res, _next) => {
   const products = await Product.find({});
@@ -18,17 +18,19 @@ export const getAllProducts = catchAsyncError(async (req, res, _next) => {
   const productsCount = await Product.countDocuments();
 
   let apiFeatures;
+  console.log(req.query.category);
   if (req.query.category) {
     apiFeatures = await new ApiFutures(Product.find({}), req.query)
       .search()
       .categories()
       .filter()
       .pagination(resultPerPage);
+  } else {
+    apiFeatures = await new ApiFutures(Product.find({}), req.query)
+      .search()
+      .filter()
+      .pagination(resultPerPage);
   }
-  apiFeatures = await new ApiFutures(Product.find({}), req.query)
-    .search()
-    .filter()
-    .pagination(resultPerPage);
 
   const products = await apiFeatures.query;
   const filteredProductsCount = products.length;
@@ -149,6 +151,23 @@ export const deleteProduct = catchAsyncError(async (req, res, next) => {
 export const getProductDetails = catchAsyncError(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
   if (!product) return next(new ErrorHandler("product is not found", 404));
+
+  product.viewsCount++;
+  await product.save();
+
+  // @ts-ignore
+  if (!req?.user?.id) {
+    await loggerUserClick.create({
+      idProduct: req?.params?.id,
+      isNotLoggin: true,
+    });
+  } else {
+    await loggerUserClick.create({
+      idProduct: req?.params?.id,
+      // @ts-ignore
+      users: req?.user?.id,
+    });
+  }
 
   res.status(200).json({
     message: "get product details successfully",

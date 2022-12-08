@@ -6,3 +6,5 @@ export { default as Product } from "./product.model";
 export { default as Topic } from "./topic.model";
 export { default as VotePost } from "./votePost.model";
 export { default as commentPost } from "./comment.model";
+export { default as loghistory } from "./loghistory.model";
+export { default as loggerUserClick } from "./loggerUserClickProduct.models";

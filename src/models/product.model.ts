@@ -35,6 +35,10 @@ const Product = new Schema(
       type: Number,
       default: 0,
     },
+    viewsCount: {
+      type: Number,
+      default: 0,
+    },
     imgs: [
       {
         public_id: {

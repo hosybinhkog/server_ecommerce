@@ -36,3 +36,22 @@ export const authorizeRoles = (...roles) => {
     next();
   };
 };
+
+export const checkUser = catchAsyncError(
+  async (req: Request, _res: Response, next: NextFunction) => {
+    const { token } = req.cookies;
+
+    if (!token) {
+      return next();
+    }
+
+    const decodedToken = await jwt.verify(
+      token,
+      process.env.SECRET_KEY_TOKEN as string
+    );
+
+    // @ts-ignore
+    req.user = await User.findById(decodedToken.id);
+    next();
+  }
+);
